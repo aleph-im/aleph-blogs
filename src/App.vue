@@ -45,7 +45,7 @@
     	<footer class="bg-white border-top p-3 text-muted small">
     	<div class="d-flex justify-content-between">
     		<div class="align-self-baseline">
-                <span class="navbar-brand mr-2"><strong>NULS Space</strong></span> is a dApp based on the NULS blockchain.
+                <span class="navbar-brand mr-2"><strong>Aleph Blogs</strong></span> is a blogging engine based on the Aleph decentralized application network.
     		</div>
         <div class="align-self-baseline">
           Currently on

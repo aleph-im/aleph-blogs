@@ -1,7 +1,7 @@
 {
-  "name": "nuls-blogs",
+  "name": "aleph-blogs",
   "version": "1.0.0",
-  "description": "A NULS-powered blogging engine dApps for multiple blogs",
+  "description": "An Aleph-powered blogging engine dApps for multiple blogs",
   "author": "Moshe Malawach <moshe.malawach@protonmail.com>",
   "private": true,
   "scripts": {

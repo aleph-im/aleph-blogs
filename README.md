@@ -1,6 +1,6 @@
-# nuls-blogs
+# aleph-blogs
 
-> A NULS-powered blogging engine dApps for multiple blogs
+> An Aleph-powered blogging engine dApps for multiple blogs
 
 ## Build Setup
 

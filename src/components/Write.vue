@@ -244,7 +244,7 @@ import router from '../router'
         this.banner_hash = await ipfs_push_file(this.banner_file, {api_server: this.api_server})
       },
       async submit() {
-        let tx = null
+        let msg = null
         if (this.hash)
           msg = await create_post(
             this.account.address, 'amend', this.body,

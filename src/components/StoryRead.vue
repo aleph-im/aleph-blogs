@@ -208,7 +208,7 @@ import bus from '../bus.js'
         let response = await axios.get(`${this.api_server}/api/v0/posts.json`, {
           params: {
             'types': 'comment',
-            'refs': this.post.hash + (this.post.tx_hash ? ','+this.post.tx_hash:''),
+            'refs': this.post.hash + (this.post.original_tx_hash ? ','+this.post.original_tx_hash:''),
             'pagination': 200
           }
         })

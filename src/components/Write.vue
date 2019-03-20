@@ -227,10 +227,10 @@ import router from '../router'
         }
       },
       async refresh() {
-        if (this.txhash) {
-          await this.getTransaction()
+        if (this.hash) {
+          await this.getPost()
           //await this.getProfile()
-          await this.getAmends()
+          //await this.getAmends()
         }
         await this.setState()
       },
@@ -245,7 +245,7 @@ import router from '../router'
         if (this.hash)
           msg = await create_post(
             this.account.address, 'amend', this.body,
-            {title: this.title, ref: this.transaction.hash,
+            {title: this.title, ref: this.hash,
              misc_content: {
                subtitle: this.subtitle,
                banner: this.banner_hash,

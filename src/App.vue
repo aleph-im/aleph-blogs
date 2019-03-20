@@ -82,7 +82,7 @@ import {private_key_to_public_key,
 } from 'nulsworldjs/src/model/data.js'
 import {broadcast} from 'nulsworldjs/src/api/create'
 import {Transaction} from 'nulsworldjs/src/model/transaction'
-import {get_aliases} from 'nulsworldjs/src/api/aliases'
+// import {get_aliases} from 'nulsworldjs/src/api/aliases'
 
 
 var hexRegEx = /([0-9]|[a-f])/gim
@@ -141,9 +141,9 @@ export default {
       this.$store.commit('set_account', null)
     },
     async update_aliases() {
-      let aliases = await get_aliases({api_server: this.api_server})
-      console.log(aliases)
-      this.$store.commit('set_aliases', aliases)
+      // let aliases = await get_aliases({api_server: this.api_server})
+      // console.log(aliases)
+      // this.$store.commit('set_aliases', aliases)
     },
     async set_network(network_id, api_server) {
       this.$store.commit({

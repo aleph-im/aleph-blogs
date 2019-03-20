@@ -13,7 +13,7 @@ import bus from './bus.js'
 export default new Vuex.Store({
   state: {
     api_server: 'http://127.0.0.1:8080',
-    network_id: 8964,
+    network_id: 261,
     ipfs_gateway: 'https://ipfs.io/ipfs/',
     account: null,
     profiles: {},

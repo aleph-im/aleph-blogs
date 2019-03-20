@@ -62,7 +62,7 @@ export default {
     },
     async update_posts() {
       // TODO: only request metadata, not body
-      let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
+      let response = await axios.get(`${this.api_server}/api/v0/posts.json`, {
         params: {
           'tags': this.tag,
           'types': 'blog_pers,blog_org',

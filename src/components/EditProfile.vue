@@ -58,14 +58,9 @@
 </template>
 <script>
 import axios from 'axios'
-import {private_key_to_public_key,
-        address_from_hash,
-        hash_from_address,
-        public_key_to_hash,
-        get_outputs_for_sum
-      } from 'nulsworldjs/src/model/data.js'
-import {fetch_profile, submit_aggregate} from 'nulsworldjs/src/api/aggregates'
-import {create_post, ipfs_push_file, broadcast} from 'nulsworldjs/src/api/create'
+import {fetch_profile, submit_aggregate} from '../api/aggregates'
+import {create_post, ipfs_push_file, broadcast} from '../api/create'
+import {nuls_sign} from '../api/sign'
 import Transaction from 'nulsworldjs/src/model/transaction.js'
 import { mapState } from 'vuex'
 import Sign from './Sign.vue'
@@ -140,22 +135,20 @@ export default {
         values['profile_picture'] = this.ppic_hash
       }
 
-      let tx = await submit_aggregate(
+      let message = await submit_aggregate(
         this.account.address, 'profile', values, {api_server: this.api_server}
       )
       // this.$store.commit('sign_tx', {
       //   'tx': tx,
       //   'reason': 'Profile modification for ' + this.account.address
       // })
-
-      tx.sign(Buffer.from(this.account.private_key, 'hex'))
-      let signed_tx = tx.serialize().toString('hex')
-      let tx_hash = await broadcast(signed_tx, {api_server: this.api_server})
+      nuls_sign(Buffer.from(this.account.private_key, 'hex'), message)
+      await broadcast(message, {api_server: this.api_server})
       this.processing = true
       function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
-      await sleep(14000)
+      await sleep(500)
       this.processing = false
       if (this.alias)
         router.push({ name: "Profile", params: {alias: this.alias} })

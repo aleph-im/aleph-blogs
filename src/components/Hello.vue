@@ -68,7 +68,7 @@ export default {
       await this.update_posts()
     },
     async update_posts() {
-      let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
+      let response = await axios.get(`${this.api_server}/api/v0/posts.json`, {
         params: {
           'types': 'blog_pers,blog_org',
           'pagination': this.per_page,

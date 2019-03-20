@@ -40,7 +40,7 @@ import axios from 'axios'
 import Posts from './Posts.vue'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from 'nulsworldjs/src/api/aggregates'
+import {fetch_profile} from '../api/aggregates'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 
@@ -100,7 +100,7 @@ import bus from '../bus.js'
       },
       async getPosts() {
         // own posts`
-        let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
+        let response = await axios.get(`${this.api_server}/api/v0/posts.json`, {
           params: {
             'types': 'blog_pers',
             'addresses': this.address,

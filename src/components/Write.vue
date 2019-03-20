@@ -98,9 +98,6 @@
             </b-tabs>
     			</article>
           <div class="clearfix float-right">
-            <b-form-text>
-               Costs 0.001 <i class="nuls"></i>
-            </b-form-text>
             <b-button :variant="(title&&body) ? 'success' : 'danger'" @click="submit" :disabled="(!(title&&body))||processing">
               {{processing ? 'Please wait...' : 'Submit'}}
             </b-button>

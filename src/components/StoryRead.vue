@@ -19,9 +19,7 @@
     						<small class="ml-2">
                   <account-name :address="address" linkclass="text-dark"></account-name>
                   <span class="text-muted d-block">
-                    {{moment.unix(transaction.time/1000).fromNow()}}<span v-if="amends.length">,
-                      updated
-                      {{moment.unix(amends[amends.length-1].time/1000).fromNow()}}
+                    {{moment.unix(post.time).fromNow()}}<span v-if="amends.length">
                     </span>
                   </span>
     						</small>
@@ -44,7 +42,7 @@
     		<div class="col-md-12 col-lg-8">
     			<article class="article-post">
             <b-button class="float-right" style="z-index: 5;"
-            :to="{name: 'StoryAmend', params: {txhash: transaction.hash}}"
+            :to="{name: 'StoryAmend', params: {hash: post.hash}}"
             v-if="account && (account.address === address)">
               Edit
             </b-button>
@@ -124,8 +122,9 @@ import Posts from './Posts.vue'
 import moment from 'moment'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from 'nulsworldjs/src/api/aggregates'
-import {create_post, broadcast} from 'nulsworldjs/src/api/create'
+import {fetch_profile} from '../api/aggregates'
+import {create_post, broadcast} from '../api/create'
+import {nuls_sign} from '../api/sign'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 
@@ -141,40 +140,41 @@ import bus from '../bus.js'
         moment: moment,
         comments: [],
         quick_post_body: '',
-        posting: false
+        posting: false,
+        post: null
       }
     },
-    props: ['txhash'],
+    props: ['hash'],
     computed: mapState({
       account: state => state.account,
       profiles: state => state.profiles,
       api_server: state => state.api_server,
       last_broadcast: state => state.last_broadcast,
       ipfs_gateway: state => state.ipfs_gateway,
-      post(state) {
-        let post = null
-        if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
-          post = Object.assign({}, this.transaction.info.post)
-        }
-        if (this.amends.length) {
-          let post_content = Object.assign({}, post.content)
-          for (let amend of this.amends) {
-            Object.assign(post_content, amend.content)
-          }
-          post.content = post_content
-        }
-        return post
-      },
-      original_post(state) {
-        let post = null
-        if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
-          post = Object.assign({}, this.transaction.info.post)
-        }
-        return post
-      },
+      // post(state) {
+      //   let post = null
+      //   if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
+      //     post = Object.assign({}, this.transaction.info.post)
+      //   }
+      //   if (this.amends.length) {
+      //     let post_content = Object.assign({}, post.content)
+      //     for (let amend of this.amends) {
+      //       Object.assign(post_content, amend.content)
+      //     }
+      //     post.content = post_content
+      //   }
+      //   return post
+      // },
+      // original_post(state) {
+      //   let post = null
+      //   if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
+      //     post = Object.assign({}, this.transaction.info.post)
+      //   }
+      //   return post
+      // },
       address() {
-        if (this.transaction)
-          return this.transaction['inputs'][0]['address']
+        if (this.post)
+          return this.post.address
       }
     }),
     components: {
@@ -184,43 +184,31 @@ import bus from '../bus.js'
       VueMarkdown
     },
     methods: {
-      async getTransaction() {
-        let response = await axios.get(`${this.api_server}/transactions/${this.txhash}.json`)
-        let transaction = response.data.transaction
-        if (transaction !== undefined)
-          this.transaction = transaction
-        else
-          this.transaction = null
+      async getPost() {
+        let response = await axios.get(`${this.api_server}/api/v0/posts.json?hashes=${this.hash}`)
+        this.post = response.data.posts[0]
       },
       async getProfile() {
-        let address = this.$route.params.address
-        this.profile = await fetch_profile(address)
-        if (this.profile === null)
-          this.profile = {}
-        else
-          this.$store.commit('store_profile', {
-            address: address,
-            profile: this.profile
-          })
+        await this.$root.fetch_profile(this.address)
       },
       async getAmends() {
-        let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
-          params: {
-            'types': 'amend',
-            'addresses': this.address,
-            'refs': this.txhash,
-            'pagination': 1 // we only need the last modification
-          }
-        })
-        this.amends = response.data.posts
-        this.amends.reverse()
+        // let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
+        //   params: {
+        //     'types': 'amend',
+        //     'addresses': this.address,
+        //     'refs': this.txhash,
+        //     'pagination': 1 // we only need the last modification
+        //   }
+        // })
+        // this.amends = response.data.posts
+        // this.amends.reverse()
       },
       async getComments() {
         // posts fron others on this wall
-        let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
+        let response = await axios.get(`${this.api_server}/api/v0/posts.json`, {
           params: {
             'types': 'comment',
-            'refs': this.transaction.hash,
+            'refs': this.post.hash + (this.post.tx_hash ? ','+this.post.tx_hash:''),
             'pagination': 200
           }
         })
@@ -233,9 +221,9 @@ import bus from '../bus.js'
         this.comments = comments // display all for now
       },
       async update() {
-        if (this.txhash)
-          await this.getTransaction()
-        if (this.transaction) {
+        if (this.hash)
+          await this.getPost()
+        if (this.post) {
           await this.getProfile()
           await this.getAmends()
           await this.getComments()
@@ -244,10 +232,10 @@ import bus from '../bus.js'
       },
       async quick_post() {
         this.posting = true
-        let tx = await create_post(
+        let msg = await create_post(
           this.account.address, 'comment',
           this.quick_post_body, {
-            ref: this.transaction.hash,
+            ref: this.post.hash,
             api_server: this.api_server
           }
         )
@@ -255,13 +243,13 @@ import bus from '../bus.js'
         //   'tx': tx,
         //   'reason': 'New comment on tx ' + this.post.hash
         // })
-        tx.sign(Buffer.from(this.account.private_key, 'hex'))
-        let signed_tx = tx.serialize().toString('hex')
-        let tx_hash = await broadcast(signed_tx, {api_server: this.api_server})
+        // tx.sign(Buffer.from(this.account.private_key, 'hex'))
+        nuls_sign(Buffer.from(this.account.private_key, 'hex'), msg)
+        await broadcast(msg, {api_server: this.api_server})
         function sleep(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
         }
-        await sleep(14000)
+        await sleep(100)
         await this.getComments()
         this.quick_post_body = ''
         this.posting = false

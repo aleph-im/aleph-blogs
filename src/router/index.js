@@ -42,13 +42,13 @@ export default new Router({
     //   props: true
     // },
     {
-      path: '/s/:txhash',
+      path: '/s/:hash',
       name: 'StoryRead',
       component: StoryRead,
       props: true
     },
     {
-      path: '/s/:txhash/amend',
+      path: '/s/:hash/amend',
       name: 'StoryAmend',
       component: Write,
       props: true

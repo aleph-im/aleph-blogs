@@ -7,7 +7,7 @@
          :key="post.hash + last_broadcast + Object.keys(profiles).length + Object.keys(post_amends).length">
 			<div class="pr-3">
 				<h2 class="mb-1 h4 font-weight-bold">
-				      <router-link :to="{ name: 'StoryRead', params: {txhash: post.hash} }" class="text-dark">{{post_amends[post.hash] ? post_amends[post.hash].content.title : post.content.title}}</router-link>
+				      <router-link :to="{ name: 'StoryRead', params: {hash: post.hash} }" class="text-dark">{{post_amends[post.hash] ? post_amends[post.hash].content.title : post.content.title}}</router-link>
 				</h2>
 				<p>
 					{{post_amends[post.hash] ? post_amends[post.hash].content.subtitle : post.content.subtitle}}
@@ -78,23 +78,23 @@ export default {
           await this.$root.fetch_profile(post.address)
     },
     async update_amends() {
-      let post_amends = {}
-      const hashes = this.posts.map(x => x.hash);
-      let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
-        params: {
-          'types': 'amend',
-          'refs': hashes.join(','),
-          'pagination': 200 // let's hope this is enough...
-        }
-      })
-      let amends = response.data.posts;
-      amends.reverse()
-      for (let amend of amends) {
-        // we only keep the last one. let's hope it has all the fields...
-        post_amends[amend.ref] = amend;
-      }
-
-      this.post_amends = post_amends
+      // let post_amends = {}
+      // const hashes = this.posts.map(x => x.hash);
+      // let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
+      //   params: {
+      //     'types': 'amend',
+      //     'refs': hashes.join(','),
+      //     'pagination': 200 // let's hope this is enough...
+      //   }
+      // })
+      // let amends = response.data.posts;
+      // amends.reverse()
+      // for (let amend of amends) {
+      //   // we only keep the last one. let's hope it has all the fields...
+      //   post_amends[amend.ref] = amend;
+      // }
+      //
+      // this.post_amends = post_amends
     }
   },
   async mounted() {

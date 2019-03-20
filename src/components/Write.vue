@@ -116,8 +116,9 @@ import axios from 'axios'
 import moment from 'moment'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from 'nulsworldjs/src/api/aggregates'
-import {create_post, ipfs_push_file, broadcast} from 'nulsworldjs/src/api/create'
+import {fetch_profile} from '../api/aggregates'
+import {create_post, ipfs_push_file, broadcast} from '../api/create'
+import {nuls_sign} from '../api/sign'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 import VueTagsInput from '@johmun/vue-tags-input';
@@ -134,6 +135,7 @@ import router from '../router'
         amends: [],
         banner_file: null,
         banner_hash: null,
+        post: null,
         title: '',
         subtitle: '',
         body: '',
@@ -143,7 +145,7 @@ import router from '../router'
         processing: false
       }
     },
-    props: ['txhash'],
+    props: ['hash'],
     computed: {
       filteredItems() {
         return this.autocompleteitems.filter((i) => {
@@ -155,20 +157,22 @@ import router from '../router'
       api_server: state => state.api_server,
       last_broadcast: state => state.last_broadcast,
       ipfs_gateway: state => state.ipfs_gateway,
-      post(state) {
-        let post = null
-        if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
-          post = Object.assign({}, this.transaction.info.post)
-        }
-        if (this.amends.length) {
-          let post_content = Object.assign({}, post.content)
-          for (let amend of this.amends) {
-            Object.assign(post_content, amend.content)
-          }
-          post.content = post_content
-        }
-        return post
-      },
+      // post(state) {
+      //   let post = null
+      //   if (this.message&&this.message.content)
+      //     post = this.message.content
+      //   // if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
+      //   //   post = Object.assign({}, this.transaction.info.post)
+      //   // }
+      //   // if (this.amends.length) {
+      //   //   let post_content = Object.assign({}, post.content)
+      //   //   for (let amend of this.amends) {
+      //   //     Object.assign(post_content, amend.content)
+      //   //   }
+      //   //   post.content = post_content
+      //   // }
+      //   return post
+      // },
       autocompleteitems(state) {
         return state.categories.map((c) => {return {text:c}})
       }
@@ -180,35 +184,35 @@ import router from '../router'
       VueTagsInput
     },
     methods: {
-      async getTransaction() {
-        let response = await axios.get(`${this.api_server}/transactions/${this.txhash}.json`)
-        this.transaction = response.data.transaction
+      async getPost() {
+        let response = await axios.get(`${this.api_server}/api/v0/posts.json?hashes=${this.hash}`)
+        this.post = response.data.posts[0]
       },
       async getProfile() {
-        let address = this.$route.params.address
-        this.profile = await fetch_profile(address)
-        if (this.profile === null)
-          this.profile = {}
-        else
-          this.$store.commit('store_profile', {
-            address: address,
-            profile: this.profile
-          })
+        // let address = this.$route.params.address
+        // this.profile = await fetch_profile(address)
+        // if (this.profile === null)
+        //   this.profile = {}
+        // else
+        //   this.$store.commit('store_profile', {
+        //     address: address,
+        //     profile: this.profile
+        //   })
       },
       async getAmends() {
-        let response = await axios.get(`${this.api_server}/ipfs/posts.json`, {
-          params: {
-            'types': 'amend',
-            'addresses': this.address,
-            'refs': this.txhash,
-            'pagination': 200
-          }
-        })
-        this.amends = response.data.posts
-        this.amends.reverse()
+        // let response = await axios.get(`${this.api_server}/api/posts.json`, {
+        //   params: {
+        //     'types': 'amend',
+        //     'addresses': this.address,
+        //     'refs': this.txhash,
+        //     'pagination': 200
+        //   }
+        // })
+        // this.amends = response.data.posts
+        // this.amends.reverse()
       },
       async setState() {
-        if (this.txhash) {
+        if (this.hash) {
           this.banner_hash = this.post.content.banner
           this.title = this.post.content.title
           this.subtitle = this.post.content.subtitle
@@ -228,7 +232,7 @@ import router from '../router'
       async refresh() {
         if (this.txhash) {
           await this.getTransaction()
-          await this.getProfile()
+          //await this.getProfile()
           await this.getAmends()
         }
         await this.setState()
@@ -241,8 +245,8 @@ import router from '../router'
       },
       async submit() {
         let tx = null
-        if (this.txhash)
-          tx = await create_post(
+        if (this.hash)
+          msg = await create_post(
             this.account.address, 'amend', this.body,
             {title: this.title, ref: this.transaction.hash,
              misc_content: {
@@ -251,7 +255,7 @@ import router from '../router'
                tags: this.tags.map(t => t.text)
              }, api_server: this.api_server})
         else
-          tx = await create_post(
+          msg = await create_post(
             this.account.address, 'blog_pers', this.body,
             {title: this.title,
              misc_content: {
@@ -260,21 +264,20 @@ import router from '../router'
                tags: this.tags.map(t => t.text)
              }, api_server: this.api_server})
 
-        tx.sign(Buffer.from(this.account.private_key, 'hex'))
-        let signed_tx = tx.serialize().toString('hex')
-        let tx_hash = await broadcast(signed_tx, {api_server: this.api_server})
+        nuls_sign(Buffer.from(this.account.private_key, 'hex'), msg)
+        await broadcast(msg, {api_server: this.api_server})
 
         this.processing = true
         function sleep(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
         }
-        await sleep(14000)
+        await sleep(100)
         this.processing = false
 
-        if (this.txhash)
-          router.push({ name: "StoryRead", params: {txhash: this.txhash} })
+        if (this.hash)
+          router.push({ name: "StoryRead", params: {hash: this.hash} })
         else
-          router.push({ name: "StoryRead", params: {txhash: tx_hash} })
+          router.push({ name: "StoryRead", params: {hash: msg.item_hash} })
 
 
         // this.$store.commit('sign_tx', {

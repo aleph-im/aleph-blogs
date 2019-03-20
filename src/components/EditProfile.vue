@@ -44,9 +44,6 @@
               </div>
             </div>
             <div class="float-right">
-              <b-form-text>
-                 Costs 0.001 <i class="nuls"></i>
-              </b-form-text>
               <b-button :variant="(name) ? 'success' : 'danger'" @click="save" :disabled="(!name)||processing">
                 {{processing ? 'Please wait...' : 'Save'}}
               </b-button>
@@ -148,7 +145,7 @@ export default {
       function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
-      await sleep(500)
+      await sleep(100)
       this.processing = false
       if (this.alias)
         router.push({ name: "Profile", params: {alias: this.alias} })

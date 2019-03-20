@@ -62,7 +62,7 @@
                      imgclass="rounded-circle" />
                  </div>
                  <div class="flex-grow-1 ml-4">
-                   <p class="my-0 text-muted float-right">{{moment.unix(comment.time/1000).fromNow()}}</p>
+                   <p class="my-0 text-muted float-right">{{moment.unix(comment.time).fromNow()}}</p>
                    <h5><account-name :address="comment.address" linkclass="text-dark"></account-name> says</h5>
                    <vue-markdown :source="comment.content.body"
                      :html="false" />

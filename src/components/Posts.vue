@@ -17,7 +17,7 @@
             linkclass="avatar-xs text-muted"
             imgclass="rounded-circle" />
           <account-name :address="post.address" linkclass="text-muted"></account-name>,
-  				{{moment.unix(post.time/1000).fromNow()}}
+  				{{moment.unix(post.time).fromNow()}}
 				</div>
 			</div>
       <div :style="`background-image: url('${ipfs_gateway}${post.content.banner}'); width: 200px;    background-size: cover; background-position: center center;   background-repeat: no-repeat;`" v-if="post.content.banner"></div>

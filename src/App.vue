@@ -16,7 +16,7 @@
     </b-modal>
     <b-navbar class="topnav navbar-expand-lg navbar-light bg-white" variant="light" fixed="top">
       <div class="container">
-        <b-navbar-brand to="/"><strong>NULS Space</strong>
+        <b-navbar-brand to="/"><strong>Aleph Blogs</strong>
           <sup><b-badge pill variant="secondary">Beta</b-badge></sup>
           </b-navbar-brand>
 
@@ -48,15 +48,15 @@
                 <span class="navbar-brand mr-2"><strong>Aleph Blogs</strong></span> is a blogging engine based on the Aleph decentralized application network.
     		</div>
         <div class="align-self-baseline">
-          Currently on
-          <span v-if="network_id===261">
+          Currently on Test-Net.
+          <!-- <span v-if="network_id===261">
             Test-Net.
             <b-link @click="set_network(8964, 'https://nuls.world')" class="text-muted font-weight-bold">Switch</b-link>
           </span>
           <span v-if="network_id===8964">
             Main-Net.
             <b-link @click="set_network(261, 'https://testnet.nuls.world')" class="text-muted font-weight-bold">Switch</b-link>
-          </span>
+          </span> -->
         </div>
     		<div class="align-self-baseline">
     			Made with the <a href="https://nuls.world" class="text-secondary font-weight-bold">NULS.World</a> API and <a target="_blank" class="text-secondary font-weight-bold" href="https://www.wowthemes.net/mundana-free-html-bootstrap-template/">Mundana Theme</a>.

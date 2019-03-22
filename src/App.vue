@@ -52,7 +52,7 @@
           </span> -->
         </div>
     		<div class="align-self-baseline">
-    			Made with the <a href="https://nuls.world" class="text-secondary font-weight-bold">NULS.World</a> API and <a target="_blank" class="text-secondary font-weight-bold" href="https://www.wowthemes.net/mundana-free-html-bootstrap-template/">Mundana Theme</a>.
+    			Made with the <a href="https://aleph.im" class="text-secondary font-weight-bold">Aleph.IM</a> and <a target="_blank" class="text-secondary font-weight-bold" href="https://www.wowthemes.net/mundana-free-html-bootstrap-template/">Mundana Theme</a>.
     		</div>
     	</div>
     	</footer>

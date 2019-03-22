@@ -99,7 +99,7 @@
     				<div class="row justify-content-between">
     					<div class="col-md-5 mb-2 mb-md-0">
     						<h5 class="font-weight-bold secondfont">Become a member</h5>
-    						 You only need an address with at least 0.01 NULS in it.
+    						 It's instant and free!
     					</div>
     					<div class="col-md-7">
     						<div class="row">

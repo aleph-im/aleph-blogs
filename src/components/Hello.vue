@@ -5,7 +5,7 @@
     		<div class="pl-4 pr-0 h-100 tofront">
     			<div class="row justify-content-between">
     				<div class="col-md-6 pt-6 pb-6 align-self-center">
-    					<h1 class="secondfont mb-3 font-weight-bold">NULS Space is a decentralized expression space.</h1>
+    					<h1 class="secondfont mb-3 font-weight-bold">Aleph Blogs is a decentralized expression space.</h1>
     				</div>
     				<div class="col-md-6 d-none d-md-block pr-0 jumbotron-img">	</div>
     			</div>

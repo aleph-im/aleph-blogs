@@ -26,10 +26,10 @@ export default new Vuex.Store({
     last_broadcast: null,
     categories: [ // categories are hard-coded for now...
       'Crypto',
-      'NULS',
+      'Aleph',
       'Tech',
       'Design',
-      '214'
+      'Random'
     ]
   },
   mutations: {

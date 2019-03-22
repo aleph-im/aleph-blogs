@@ -2,13 +2,6 @@
   <div>
     <notifications group="wallet" />
     <notifications group="blog" />
-    <b-modal ref="warningModal" hide-footer title="Warning" v-model="warningShow">
-      <div class="d-block text-center">
-        <h3>Warning</h3>
-        <p>The wallet part is beta software.</p>
-        <p>I am not responsible if you lose any fund with it.</p>
-      </div>
-    </b-modal>
     <b-modal id="signModal" ref="signModal"
              hide-footer :title="signReason" :visible="signShow"
              @hidden="$store.commit('signed_tx')">
@@ -17,7 +10,7 @@
     <b-navbar class="topnav navbar-expand-lg navbar-light bg-white" variant="light" fixed="top">
       <div class="container">
         <b-navbar-brand to="/"><strong>Aleph Blogs</strong>
-          <sup><b-badge pill variant="secondary">Beta</b-badge></sup>
+          <sup><b-badge pill variant="secondary">Testnet</b-badge></sup>
           </b-navbar-brand>
 
         <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -96,7 +89,6 @@ export default {
   data() {
     return {
       //msg: 'Welcome to Your Vue.js App'
-      'warningShow': false,
       'private_key': null
     }
   },
@@ -156,8 +148,6 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      if (this.account)
-        this.warningShow = true
       this.update_aliases()
     })
   },

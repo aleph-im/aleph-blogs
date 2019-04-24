@@ -172,7 +172,7 @@ import {private_key_to_public_key,
   address_from_hash,
   hash_from_address,
   public_key_to_hash
-} from 'nulsworldjs/src/model/data'
+} from 'aleph-js/src/api/nuls'
 import store from '../store'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'

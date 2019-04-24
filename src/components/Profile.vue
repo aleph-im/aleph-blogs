@@ -40,7 +40,7 @@ import axios from 'axios'
 import Posts from './Posts.vue'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from '../api/aggregates'
+import {fetch_profile} from 'aleph-js/src/api/aggregates'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 

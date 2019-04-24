@@ -113,9 +113,10 @@ import axios from 'axios'
 import moment from 'moment'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from '../api/aggregates'
-import {create_post, ipfs_push_file, broadcast} from '../api/create'
-import {nuls_sign} from '../api/sign'
+import {fetch_profile} from 'aleph-js/src/api/aggregates'
+import {ipfs_push_file} from 'aleph-js/src/api/create'
+import {create_post} from 'aleph-js/src/api/posts'
+// import {nuls_sign} from '../api/sign'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 import VueTagsInput from '@johmun/vue-tags-input';
@@ -259,10 +260,13 @@ import router from '../router'
                subtitle: this.subtitle,
                banner: this.banner_hash,
                tags: this.tags.map(t => t.text)
-             }, api_server: this.api_server})
+             },
+             api_server: this.api_server,
+             chain: this.account.type})
 
-        nuls_sign(Buffer.from(this.account.private_key, 'hex'), msg)
-        await broadcast(msg, {api_server: this.api_server})
+        // nuls_sign(Buffer.from(this.account.private_key, 'hex'), msg)
+        // await broadcast(msg, {api_server: this.api_server})
+        await this.$root.send(msg)
 
         this.processing = true
         function sleep(ms) {

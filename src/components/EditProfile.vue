@@ -57,9 +57,8 @@
 import axios from 'axios'
 import {fetch_profile, submit} from 'aleph-js/src/api/aggregates'
 import {ipfs_push_file, broadcast} from 'aleph-js/src/api/create'
-import Transaction from 'nulsworldjs/src/model/transaction.js'
 import { mapState } from 'vuex'
-import Sign from './Sign.vue'
+// import Sign from './Sign.vue'
 import router from '../router'
 
 export default {
@@ -157,7 +156,7 @@ export default {
   },
   props: ['address'],
   components: {
-    Sign
+    // Sign
   },
   async created() {
     await this.fetch_profile()

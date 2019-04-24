@@ -2,11 +2,6 @@
   <div>
     <notifications group="wallet" />
     <notifications group="blog" />
-    <b-modal id="signModal" ref="signModal"
-             hide-footer :title="signReason" :visible="signShow"
-             @hidden="$store.commit('signed_tx')">
-      <sign v-if="signShow" :account="selected_account" :tx="signTx" :reason="signReason" @message-broadcasted="$store.commit('signed_tx')"></sign>
-    </b-modal>
     <b-navbar class="topnav navbar-expand-lg navbar-light bg-white" variant="light" fixed="top">
       <div class="container">
         <b-navbar-brand to="/"><strong>Aleph Blogs</strong>
@@ -64,19 +59,6 @@
 import { mapState } from 'vuex'
 import AccountAvatar from './components/AccountAvatar.vue'
 import AccountName from './components/AccountName.vue'
-import Sign from './components/Sign.vue'
-
-
-import {call_view_method,
-        prepare_contract_call_tx} from 'nulsworldjs/src/api/contracts'
-import {private_key_to_public_key,
-  address_from_hash,
-  public_key_to_hash
-} from 'nulsworldjs/src/model/data.js'
-import {broadcast} from 'nulsworldjs/src/api/create'
-import {Transaction} from 'nulsworldjs/src/model/transaction'
-// import {get_aliases} from 'nulsworldjs/src/api/aliases'
-
 
 var hexRegEx = /([0-9]|[a-f])/gim
 function isHex (input) {
@@ -108,27 +90,10 @@ export default {
     }
   },
   components: {
-    Sign,
     AccountName,
     AccountAvatar
   },
   methods: {
-    check_pkey() {
-      if (!isHex(this.private_key)) { return false }
-      if (!this.private_key) { return false }
-      if ((this.private_key.length === 66) && (this.private_key.substring(0, 2) === '00')) {
-        this.private_key = this.private_key.substring(2, 66)
-        return true
-      }
-      if (this.private_key.length !== 64) { return false }
-      try {
-        let prvbuffer = Buffer.from(this.private_key, 'hex')
-        let pub = private_key_to_public_key(prvbuffer)
-        return true
-      } catch (e) {
-        return false
-      }
-    },
     async logout() {
       this.$store.commit('set_account', null)
     },

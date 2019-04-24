@@ -209,7 +209,7 @@ export default {
   data () {
     return {
       // msg: 'Welcome to Your Vue.js App'
-      'mode': 'import_privkey',
+      'mode': 'create',
       'encrypted_private_key': '',
       'private_key': '',
       'passphrase': '',
@@ -322,6 +322,7 @@ export default {
     add () {
       store.commit('set_account', {
         'name': this.address,
+        'type': 'NULS',
         'private_key': this.private_key,
         'public_key': this.public_key,
         'address': this.address

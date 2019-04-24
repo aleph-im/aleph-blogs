@@ -55,9 +55,8 @@
 </template>
 <script>
 import axios from 'axios'
-import {fetch_profile, submit_aggregate} from '../api/aggregates'
-import {create_post, ipfs_push_file, broadcast} from '../api/create'
-import {nuls_sign} from '../api/sign'
+import {fetch_profile, submit} from 'aleph-js/src/api/aggregates'
+import {ipfs_push_file, broadcast} from 'aleph-js/src/api/create'
 import Transaction from 'nulsworldjs/src/model/transaction.js'
 import { mapState } from 'vuex'
 import Sign from './Sign.vue'
@@ -132,15 +131,18 @@ export default {
         values['profile_picture'] = this.ppic_hash
       }
 
-      let message = await submit_aggregate(
-        this.account.address, 'profile', values, {api_server: this.api_server}
+      let message = await submit(
+        this.account.address, 'profile', values, {
+          api_server: this.api_server,
+          channel: 'blog',
+          chain: this.account.type
+        }
       )
       // this.$store.commit('sign_tx', {
       //   'tx': tx,
       //   'reason': 'Profile modification for ' + this.account.address
       // })
-      nuls_sign(Buffer.from(this.account.private_key, 'hex'), message)
-      await broadcast(message, {api_server: this.api_server})
+      await this.$root.send(message)
       this.processing = true
       function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));

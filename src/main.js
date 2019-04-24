@@ -35,7 +35,7 @@ new Vue({
   }),
   data () {
     return {
-      web3: null
+      w3: null
     }
   },
   methods: {
@@ -52,13 +52,13 @@ new Vue({
         message = nuls_sign(Buffer.from(this.account.private_key, 'hex'), message)
       } else if (this.account.type=="ETH") {
         if (web3 !== undefined) {
-          message = await web3_sign(this.web3, this.account.address, message)
+          message = await web3_sign(this.w3, this.account.address, message)
         }
       }
       await broadcast(message, {api_server: this.api_server})
     },
     async setWeb3Account() {
-      let accounts = await this.web3.eth.getAccounts()
+      let accounts = await this.w3.eth.getAccounts()
       store.commit('set_account', {
         'name': accounts[0],
         'type': 'ETH',
@@ -68,24 +68,33 @@ new Vue({
     async checkWeb3() {
       // Modern dapp browsers...
       if (window.ethereum) {
-          this.web3 = new Web3(ethereum);
-          try {
-              // Request account access if needed
-              await ethereum.enable();
-              await this.setWeb3Account();
-          } catch (error) {
-              // User denied account access...
-          }
+        this.w3 = new Web3(ethereum);
+        try {
+            // Request account access if needed
+            await ethereum.enable();
+            await this.setWeb3Account();
+        } catch (error) {
+            // User denied account access...
+        }
       }
       // Legacy dapp browsers...
       else if (window.web3) {
-          this.web3 = new Web3(web3.currentProvider);
-          // Acccounts always exposed
-          await this.setWeb3Account();
+        try {
+          this.w3 = new Web3(window.web3.currentProvider);
+        } catch (e) {
+          this.$notify({
+            group: 'wallet',
+            title: 'Metamask/Web3 issue',
+            'type': 'error',
+            text: 'You Web3 provider seems incompatible or too old. Please upgrade.'
+          })
+        }
+        // Acccounts always exposed
+        await this.setWeb3Account();
       }
       // Non-dapp browsers...
       else {
-          console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+        console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
       }
 
       if ((!this.account) || (this.account.type == 'ETH'))
@@ -93,7 +102,7 @@ new Vue({
 
       var accountInterval = setInterval(function() {
         if ((!this.account) || (this.account.type == 'ETH')) {
-          if (this.web3.eth.accounts[0] !== this.account.address) {
+          if (this.b3.eth.accounts[0] !== this.account.address) {
             this.setWeb3Account();
           }
         }
@@ -101,7 +110,7 @@ new Vue({
     }
   },
   mounted: function() {
-    this.checkWeb3()
+    setTimeout(this.checkWeb3.bind(this), 500)
   },
   // watch: {
   //   'account': {

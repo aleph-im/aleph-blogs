@@ -102,7 +102,7 @@ new Vue({
 
       var accountInterval = setInterval(function() {
         if ((!this.account) || (this.account.type == 'ETH')) {
-          if (this.b3.eth.accounts[0] !== this.account.address) {
+          if (this.w3.eth.accounts[0] !== this.account.address) {
             this.setWeb3Account();
           }
         }

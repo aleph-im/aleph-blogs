@@ -246,21 +246,26 @@ import router from '../router'
         if (this.hash)
           msg = await create_post(
             this.account.address, 'amend', this.body,
-            {title: this.title, ref: this.hash,
+            {ref: this.hash,
              misc_content: {
-               subtitle: this.subtitle,
-               banner: this.banner_hash,
-               tags: this.tags.map(t => t.text)
-             }, api_server: this.api_server})
-        else
-          msg = await create_post(
-            this.account.address, 'blog_pers', this.body,
-            {title: this.title,
-             misc_content: {
+               title: this.title,
                subtitle: this.subtitle,
                banner: this.banner_hash,
                tags: this.tags.map(t => t.text)
              },
+             channel: 'blog',
+             api_server: this.api_server,
+             chain: this.account.type})
+        else
+          msg = await create_post(
+            this.account.address, 'blog_pers', this.body,
+            {misc_content: {
+              title: this.title,
+               subtitle: this.subtitle,
+               banner: this.banner_hash,
+               tags: this.tags.map(t => t.text)
+             },
+             channel: 'blog',
              api_server: this.api_server,
              chain: this.account.type})
 

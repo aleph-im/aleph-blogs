@@ -54,7 +54,7 @@
           <div v-if="comments.length">
             <h4 class="my-5">{{comments.length}} thoughts on "{{post.content.title}}"</h4>
             <div v-for="comment in comments"
-                 :key="post.hash + Object.keys(profiles).length">
+                 :key="comment.hash + Object.keys(profiles).length">
                <div class="d-md-flex justify-content-between">
                  <div class="flex-shrink-1">
                    <account-avatar :address="comment.address"
@@ -122,8 +122,7 @@ import Posts from './Posts.vue'
 import moment from 'moment'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from 'aleph-js/src/api/aggregates'
-import {broadcast} from 'aleph-js/src/api/create'
+import {aggregates, posts} from  'aleph-js'
 import {create_post} from 'aleph-js/src/api/posts'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
@@ -151,6 +150,7 @@ import bus from '../bus.js'
       api_server: state => state.api_server,
       last_broadcast: state => state.last_broadcast,
       ipfs_gateway: state => state.ipfs_gateway,
+      channel: state => state.channel,
       // post(state) {
       //   let post = null
       //   if (this.transaction&&this.transaction.info&&this.transaction.info.post) {
@@ -232,12 +232,15 @@ import bus from '../bus.js'
       },
       async quick_post() {
         this.posting = true
-        let msg = await create_post(
+        let msg = await posts.submit(
           this.account.address, 'comment',
-          this.quick_post_body, {
+          {body: this.quick_post_body}, 
+          {
             ref: this.post.hash,
             api_server: this.api_server,
-            chain: this.account.type
+            chain: this.account.type,
+            inline: false,
+            channel: this.channel
           }
         )
         // this.$store.commit('sign_tx', {
@@ -251,10 +254,12 @@ import bus from '../bus.js'
         function sleep(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
         }
-        await sleep(100)
+        await sleep(500)
         await this.getComments()
         this.quick_post_body = ''
         this.posting = false
+        await sleep(500)
+        await this.getComments()
       }
     },
     watch: {

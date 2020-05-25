@@ -21,6 +21,7 @@ const en = {
 
   resource: {
     keystore_file: "Keystore File",
+    mnemonics_words: "Mnemonic words",
     encrypted_private_key: "Encrypted Private Key",
     private_key: "Private Key",
     public_key: "Public Key",
@@ -86,10 +87,9 @@ const en = {
 
   create: {
     new_text: `
-This is a new private key, just generated for you.
+This is called your private key, represented as easy to remember twelve "mnemonic words".
 
-Please write it down, this is **important**.
-Without it, no way to access your funds.
+Please write those down, without them, there is no way to recover your account. 
     `,
     import_text: `
 Enter your private key to access your account.
@@ -104,6 +104,7 @@ Please upload your keystore file to import your account.
     `,
     heading: "Add new wallet",
     create: "Create new wallet",
+    import_mnemonics: "Login by mnemonics",
     import_privkey: "Import private key",
     import_encrypted_privkey: "Import encrypted key",
     import_keystore: "Import keystore",

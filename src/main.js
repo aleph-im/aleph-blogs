@@ -8,12 +8,11 @@ import Notifications from 'vue-notification'
 import vSelect from 'vue-select'
 import store from './store'
 import { mapState } from 'vuex'
-import {fetch_profile} from 'aleph-js/src/api/aggregates'
+import {
+  nuls, nuls2, neo, ethereum, aggregates, broadcast
+} from 'aleph-js'
 import i18n from './i18n/i18n'
 // TODO: use aleph-js instead!!
-import {broadcast} from 'aleph-js/src/api/create'
-import {sign as nuls_sign} from 'aleph-js/src/api/nuls'
-import {sign as web3_sign} from 'aleph-js/src/api/ethereum'
 import Web3 from 'web3'
 
 Vue.use(BootstrapVue)
@@ -41,46 +40,45 @@ new Vue({
   methods: {
     async fetch_profile(address) {
       console.log(address)
-      let profile = await fetch_profile(address, {api_server: this.api_server});
+      let profile = await aggregates.fetch_profile(address, {api_server: this.api_server})
       this.$store.commit('store_profile', {
         address: address,
         profile: profile
       })
     },
     async send(message) {
-      if (this.account.type=="NULS") {
-        message = nuls_sign(Buffer.from(this.account.private_key, 'hex'), message)
-      } else if (this.account.type=="ETH") {
-        if (web3 !== undefined) {
-          message = await web3_sign(this.w3, this.account.address, message)
-        }
+      if (this.account.type === "NULS") {
+        message = nuls.sign(Buffer.from(this.account.private_key, 'hex'), message)
+      } else if (this.account.type === "NULS2") {
+        message = await nuls2.sign(this.account, message)
+      } else if (this.account.type === "NEO") {
+        message = await neo.sign(this.account, message)
+      } else if (this.account.type === "ETH") {
+        message = await ethereum.sign(this.account, message)
       }
       await broadcast(message, {api_server: this.api_server})
     },
     async setWeb3Account() {
-      let accounts = await this.w3.eth.getAccounts()
-      store.commit('set_account', {
-        'name': accounts[0],
-        'type': 'ETH',
-        'address': accounts[0]
-      })
+      let account = await ethereum.from_provider(window['ethereum'] || window.web3.currentProvider)
+      // let accounts = await this.w3.eth.getAccounts()
+      if (account) {
+        store.commit('set_account', account)
+      }
     },
     async checkWeb3() {
       // Modern dapp browsers...
       if (window.ethereum) {
-        this.w3 = new Web3(ethereum);
+        this.w3 = new Web3(ethereum)
         try {
-            // Request account access if needed
-            await ethereum.enable();
-            await this.setWeb3Account();
+          // Request account access if needed
+          await ethereum.enable()
+          await this.setWeb3Account()
         } catch (error) {
-            // User denied account access...
+          // User denied account access...
         }
-      }
-      // Legacy dapp browsers...
-      else if (window.web3) {
+      } else if (window.web3) { // Legacy dapp browsers...
         try {
-          this.w3 = new Web3(window.web3.currentProvider);
+          this.w3 = new Web3(window.web3.currentProvider)
         } catch (e) {
           this.$notify({
             group: 'wallet',
@@ -90,27 +88,32 @@ new Vue({
           })
         }
         // Acccounts always exposed
-        await this.setWeb3Account();
-      }
-      // Non-dapp browsers...
-      else {
+        await this.setWeb3Account()
+      } else { // Non-dapp browsers...
         console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
       }
 
-      if ((!this.account) || (this.account.type == 'ETH'))
-        this.setWeb3Account();
+      if ((!this.account) || (this.account.type === 'ETH')) {
+        await this.setWeb3Account()
+      }
 
-      var accountInterval = setInterval(function() {
-        if ((!this.account) || (this.account.type == 'ETH')) {
-          if (this.w3.eth.accounts[0] !== this.account.address) {
-            this.setWeb3Account();
-          }
-        }
-      }.bind(this), 1000);
+      // var accountInterval = setInterval(function() {
+      //   if ((!this.account) || (this.account.type == 'ETH')) {
+      //     if (this.w3.eth.accounts[0] !== this.account.address) {
+      //       this.setWeb3Account()
+      //     }
+      //   }
+      // }.bind(this), 1000)
+    },
+    async doWeb3Login() {
+      await this.checkWeb3()
+      if (this.account) {
+        this.$router.push({name: 'ProfileAddress', params: {address: this.account.address}})
+      }
     }
   },
   mounted: function() {
-    setTimeout(this.checkWeb3.bind(this), 500)
+    //setTimeout(this.checkWeb3.bind(this), 500)
   },
   // watch: {
   //   'account': {

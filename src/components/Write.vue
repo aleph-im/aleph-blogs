@@ -113,9 +113,7 @@ import axios from 'axios'
 import moment from 'moment'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from 'aleph-js/src/api/aggregates'
-import {ipfs_push_file} from 'aleph-js/src/api/create'
-import {create_post} from 'aleph-js/src/api/posts'
+import {posts, aggregates} from 'aleph-js'
 // import {nuls_sign} from '../api/sign'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
@@ -155,6 +153,7 @@ import router from '../router'
       api_server: state => state.api_server,
       last_broadcast: state => state.last_broadcast,
       ipfs_gateway: state => state.ipfs_gateway,
+      channel: state => state.channel,
       // post(state) {
       //   let post = null
       //   if (this.message&&this.message.content)
@@ -244,30 +243,30 @@ import router from '../router'
       async submit() {
         let msg = null
         if (this.hash)
-          msg = await create_post(
-            this.account.address, 'amend', this.body,
+          msg = await posts.submit(
+            this.account.address, 'amend', {
+              body: this.body,
+              title: this.title,
+              subtitle: this.subtitle,
+              banner: this.banner_hash,
+              tags: this.tags.map(t => t.text)
+            },
             {ref: this.hash,
-             misc_content: {
-               title: this.title,
-               subtitle: this.subtitle,
-               banner: this.banner_hash,
-               tags: this.tags.map(t => t.text)
-             },
-             channel: 'blog',
+             channel: this.channel,
              api_server: this.api_server,
              chain: this.account.type})
         else
-          msg = await create_post(
-            this.account.address, 'blog_pers', this.body,
-            {misc_content: {
+          msg = await posts.submit(
+            this.account.address, 'blog_pers', {
+              body: this.body,
               title: this.title,
-               subtitle: this.subtitle,
-               banner: this.banner_hash,
-               tags: this.tags.map(t => t.text)
-             },
-             channel: 'blog',
-             api_server: this.api_server,
-             chain: this.account.type})
+              subtitle: this.subtitle,
+              banner: this.banner_hash,
+              tags: this.tags.map(t => t.text)
+            }, {
+              channel: this.channel,
+              api_server: this.api_server,
+              chain: this.account.type})
 
         // nuls_sign(Buffer.from(this.account.private_key, 'hex'), msg)
         // await broadcast(msg, {api_server: this.api_server})
@@ -277,7 +276,7 @@ import router from '../router'
         function sleep(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
         }
-        await sleep(100)
+        await sleep(200)
         this.processing = false
 
         if (this.hash)

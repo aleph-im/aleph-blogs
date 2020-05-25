@@ -40,7 +40,7 @@ import axios from 'axios'
 import Posts from './Posts.vue'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
-import {fetch_profile} from 'aleph-js/src/api/aggregates'
+import {aggregates} from 'aleph-js'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 
@@ -60,6 +60,7 @@ import bus from '../bus.js'
     computed: mapState({
       account: state => state.account,
       api_server: state => state.api_server,
+      profiles: state => state.profiles,
       last_broadcast: state => state.last_broadcast,
       alias(state) {
         let alias = this.$route.params.alias
@@ -89,14 +90,10 @@ import bus from '../bus.js'
     },
     methods: {
       async getProfile() {
-        this.profile = await fetch_profile(this.address, {api_server: this.api_server})
+        await this.$root.fetch_profile(this.address)
+        this.profile = this.profiles[this.address]
         if (this.profile === null)
           this.profile = {}
-        else
-          this.$store.commit('store_profile', {
-            address: this.address,
-            profile: this.profile
-          })
       },
       async getPosts() {
         // own posts`

@@ -55,8 +55,7 @@
 </template>
 <script>
 import axios from 'axios'
-import {fetch_profile, submit} from 'aleph-js/src/api/aggregates'
-import {ipfs_push_file, broadcast} from 'aleph-js/src/api/create'
+import {aggregates, ipfs_push_file} from 'aleph-js'
 import { mapState } from 'vuex'
 // import Sign from './Sign.vue'
 import router from '../router'
@@ -77,6 +76,8 @@ export default {
   },
   computed: mapState({
     account: state => state.account,
+    channel: state => state.channel,
+    profiles: state => state.profiles,
     api_server: state => state.api_server,
     last_broadcast: state => state.last_broadcast,
     ipfs_gateway: state => state.ipfs_gateway,
@@ -105,9 +106,10 @@ export default {
     },
     async fetch_profile() {
       this.loaded = false
+      await this.$root.fetch_profile(this.address)
       let address = this.address
-      let profile = await fetch_profile(address, {api_server:this.api_server})
-      if (profile !== null) {
+      let profile = this.profiles[address]
+      if ((profile !== null)&&(profile !== undefined)) {
         this.name = profile.name ? profile.name : ''
         this.bio = profile.bio ? profile.bio : ''
         this.ppic_hash = profile.profile_picture ? profile.profile_picture : ''
@@ -130,10 +132,10 @@ export default {
         values['profile_picture'] = this.ppic_hash
       }
 
-      let message = await submit(
+      let message = await aggregates.submit(
         this.account.address, 'profile', values, {
           api_server: this.api_server,
-          channel: 'blog',
+          channel: this.channel,
           chain: this.account.type
         }
       )
@@ -146,7 +148,7 @@ export default {
       function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
-      await sleep(100)
+      await sleep(300)
       this.processing = false
       if (this.alias)
         router.push({ name: "Profile", params: {alias: this.alias} })

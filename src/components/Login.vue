@@ -75,26 +75,69 @@
                     label-for="private_key"
                     :state="prvState"
                 >
-                    <b-form-textarea id="private_key" :state="prvState"
+                    <b-form-textarea id="private_key"
+                                  :state="tentative_account!==null"
                                   v-model="private_key"
                                   v-on:input="analyze"
                                   :maxlength="66"
                                   :rows="1"></b-form-textarea>
                   </b-form-group>
 
-                  <label>{{$t('resource.public_key')}}</label>
+                  <label v-if="tentative_account">{{$t('resource.public_key')}}</label>
                   <code class="d-block text-truncate" v-if="tentative_account">{{tentative_account.public_key||'--'}}</code>
 
-                  <label>{{$t('resource.address')}}</label>
+                  <label v-if="tentative_account">{{$t('resource.address')}}</label>
                   <code class="d-block text-truncate" v-if="tentative_account">{{tentative_account.address||'--'}}</code>
 
                 </div>
 
                 <!-- Submit -->
-                <b-button  size="lg" variant="primary" class="btn-block mb-3" :disabled="!prvState" v-on:click="add">
+                <b-button  size="lg" variant="primary" class="btn-block mb-3" :disabled="!tentative_account" v-on:click="add">
                   {{$t('actions.add_it')}}
                 </b-button>
-            </form>
+              </form>
+            </div>
+
+            <div v-if="mode == 'import_mnemonics'">
+              <div class="text-center">
+                <vue-markdown :html="false" :source="$t('create.import_text')"></vue-markdown>
+              </div>
+                <!-- Form -->
+              <form>
+                <!-- Email address -->
+                <div class="form-group my-5">
+
+                  <b-form-group
+                    :label="$t('resource.private_key')"
+                    label-for="private_key"
+                    :state="prvState"
+                >
+                    <b-form-textarea id="mnemonics" :state="mnemoState()===true"
+                                  v-model="mnemonics"
+                                  v-on:input="analyze"
+                                  :maxlength="200"
+                                  :rows="1"></b-form-textarea>
+                    <b-form-invalid-feedback id="input-live-feedback">
+                      {{mnemoState()}}
+                    </b-form-invalid-feedback>
+                  </b-form-group>
+
+                  <label v-if="tentative_account">{{$t('resource.private_key')}}</label>
+                  <code class="d-block text-truncate my-2" v-if="tentative_account">{{tentative_account.private_key || '--'}}</code>
+
+                  <label v-if="tentative_account">{{$t('resource.public_key')}}</label>
+                  <code class="d-block text-truncate" v-if="tentative_account">{{tentative_account.public_key||'--'}}</code>
+
+                  <label v-if="tentative_account">{{$t('resource.address')}}</label>
+                  <code class="d-block text-truncate" v-if="tentative_account">{{tentative_account.address||'--'}}</code>
+
+                </div>
+
+                <!-- Submit -->
+                <b-button  size="lg" variant="primary" class="btn-block mb-3" :disabled="!tentative_account" v-on:click="add">
+                  {{$t('actions.add_it')}}
+                </b-button>
+              </form>
             </div>
           </div>
         </div> <!-- / .row -->
@@ -111,6 +154,7 @@ import store from '../store'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 var shajs = require('sha.js')
+const bip39 = require('bip39')
 
 const secp256k1 = require('secp256k1')
 
@@ -147,6 +191,7 @@ export default {
       'encrypted_private_key': '',
       'private_key': '',
       'passphrase': '',
+      'mnemonics': '',
       'public_key': null,
       'address': null,
       'keystore_file': null,
@@ -169,22 +214,6 @@ export default {
     VueMarkdown
   },
   computed: {
-    prvState () {
-      if (!isHex(this.private_key)) { return false }
-      if (!this.private_key) { return false }
-      if ((this.private_key.length === 66) && (this.private_key.substring(0, 2) === '00')) {
-        this.private_key = this.private_key.substring(2, 66)
-        return true
-      }
-      if (this.private_key.length !== 64) { return false }
-      try {
-        let prvbuffer = Buffer.from(this.private_key, 'hex')
-        let pub = private_key_to_public_key(prvbuffer)
-        return true
-      } catch (e) {
-        return false
-      }
-    },
     ... mapState([
       // map this.count to store.state.count
       'account',

@@ -123,7 +123,6 @@ import moment from 'moment'
 import AccountAvatar from './AccountAvatar.vue'
 import AccountName from './AccountName.vue'
 import {aggregates, posts} from  'aleph-js'
-import {create_post} from 'aleph-js/src/api/posts'
 import { mapState } from 'vuex'
 import VueMarkdown from 'vue-markdown'
 
